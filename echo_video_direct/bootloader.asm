@@ -23,10 +23,10 @@ echo:
     mov ax, video_memory
     mov es, ax
 
-    mov cx, 07D0h
+    mov cx, 01000h
     xor di, di
     .clear_screen:
-        mov [es:di], word 020h
+        mov [es:di], word 4020h
         add edi, 2
         loop .clear_screen
 
@@ -42,15 +42,14 @@ echo:
         mov cx, 16
         .nested_loop:
             test ax, 08000h
-            jz .print_space
-            mov [es:di], byte 'X'
+            jz .red_space
+            mov [es:di], byte ' '
             inc di
-            mov [es:di], byte 2
+            mov [es:di], byte 20h
             jmp .kek
-            .print_space:
-                mov [es:di], byte ' '
+            .red_space:
                 inc di
-                mov [es:di], byte 0
+                mov [es:di], byte 40h
             .kek:
             shl ax, 1
             inc di
