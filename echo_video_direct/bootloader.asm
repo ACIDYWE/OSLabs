@@ -10,7 +10,7 @@ start:
     mov ds, ax
 
     mov ss, ax
-    mov sp, 0FFFEh
+    mov sp, 07C00h
 
     call echo
 
