@@ -12,8 +12,10 @@ start:
     mov ss, ax
     mov sp, 0FFFEh
 
-    call echo
+    jmp 0:echo
 
+halt_loop:
+    hlt
     jmp $
 
 
@@ -54,7 +56,7 @@ echo:
     .end_of_echo_loop:
 
 
-    ret
+    jmp halt_loop
 
 
 too_lazy db 'I', 0x27,'m too lazy now, so it no ascii arts left, sorry ;C', 0
