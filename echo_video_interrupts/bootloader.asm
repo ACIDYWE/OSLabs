@@ -1,7 +1,6 @@
 BITS 16
 
 ORG 0x7c00
-video_memory equ 0B800h
 
 
 start:
@@ -26,9 +25,6 @@ echo:
     xor dh, dh
     xor dl, dl
     int 10h
-
-    mov ax, video_memory
-    mov es, ax
 
     mov cx, 0x1000
     mov ah, 0xE
