@@ -1,12 +1,24 @@
-%ifndef SECTIONS_TO_READ
-    %define SECTIONS_TO_READ 1
+%ifndef SECTORS_TO_READ
+    %define SECTORS_TO_READ 1
 %endif
 
-%define MEM_AREA 07E00h
+%define MEM_AREA            07E00h
+%define SECTORS_AMOUNT      62
+
+%macro verify 3
+    %if %1 <= %2
+        ; nothing
+    %else
+        %error %3
+    %endif
+%endmacro
 
 BITS 16
 
-ORG 0x7c00
+ORG 7c00h
+
+; FUCKING DONE!
+; MAXIM DON'T FUCKING TOUCH IT, I DARE YOU, I GOD DAMN DARE YOU
 
 start:
 
@@ -20,64 +32,37 @@ start:
 
     mov es, ax
 
-    jmp 0:read
+    jmp 0:read_kernel
 
 halt_loop:
     hlt
     jmp halt_loop
 
-read:
+read_kernel:
+    verify SECTORS_TO_READ, SECTORS_AMOUNT, "[!] INVALID SECTORS_TO_READ, TOO BIG"
     
-    mov ah, 2
-    mov al, SECTIONS_TO_READ
+
+    mov bx, MEM_AREA
     
-    mov dx, [DRIVE]
-    xor dh, dh
+    mov ah, 2                   ;   read sectors into memory (int 0x13, ah = 0x02)
+    mov al, byte SECTORS_TO_READ     
+    
+    mov dx, [DRIVE]             ;   dl - drive index
+    xor dh, dh                  ;   dh - head
     
     xor cx, cx
     mov cl, 2
 
-    mov bx, MEM_AREA
-
     int 13h
 
-
-    mov ah, 2
-    xor bh, bh
-    xor dh, dh
-    xor dl, dl
-    int 10h
-
-    mov cx, 0x1000
-    mov ah, 0xE
-    mov al, 32
-    .clear_loop:
-        int 10h
-        loop .clear_loop
-
-    mov ah, 2
-    xor bh, bh
-    xor dh, dh
-    xor dl, dl
-    int 10h
-
-
-    mov bx, MEM_AREA
-    mov ah, 0xE
-    .echo_loop:
-        mov al, [es:bx]
-        inc bx
-        test al, al
-        jz .end_of_echo_loop
-        int 10h
-        jmp .echo_loop
-
-    .end_of_echo_loop:
-
+    jmp MEM_AREA
 
     jmp halt_loop
 
 
 DRIVE dw 0
+aTooBig db 'Total amount of SECTORS to read is too big', 0
+aFail db 'Something wrong', 0
+aSuccess db 'It', 27, 's totally ok', 0
 times 510 - ($ - $$) db 90h
 dw 0xAA55
