@@ -62,7 +62,7 @@ list_protmode: $(PROTMODE_SRC)
 
 
 clean:
-	rm -f $(IMG) $(BIN) $(DRIVE_DATA) $(KERNEL_OBJ) $(KERNEL_BIN) $(PROTMODE_OBJ) $(BOOTLOADER_BIN)
+	rm -f $(IMG) $(BIN) $(DRIVE_DATA) $(KERNEL_OBJ) $(KERNEL_BIN) $(PROTMODE_OBJ) $(BOOTLOADER_BIN) $(UTILS_OBJ)
 
 
 print-%: ; @echo $* = $($*)
