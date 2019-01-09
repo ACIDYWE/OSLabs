@@ -103,6 +103,7 @@ void print_str(const char* string) {
 }
 
 void __do_panic(const char* reason, const char* function, const char* loc) {
+    RESET_CAR();
     __fill_screen(0x10, ' ');
     const short color = 0x1F00;
     short* vga = VGA_PTR;
