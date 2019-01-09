@@ -1,5 +1,7 @@
 [BITS 16]
 
+; ORG 7E00h
+
 trampo:
     mov ax, 0x2401 ; A20
     int 0x15
@@ -14,9 +16,9 @@ trampo:
 
     jmp 8:OOOOOOH_YEAH_IM_FEELING_MYSELF_SO_PROTECTED_NOW
 
-.catch_loop:
+trampo.catch_loop:
     hlt
-    jmp .catch_loop
+    jmp trampo.catch_loop
 
 
 [BITS 32]
@@ -26,37 +28,36 @@ OOOOOOH_YEAH_IM_FEELING_MYSELF_SO_PROTECTED_NOW:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ax STACK_SEG
     mov ss, ax
-    mov esp, 0xfffff0
-    jmp $
+    mov esp, 0x1fe0000
+
+    extern kmain
+    call kmain
+
+    jmp trampo.catch_loop
     
 
-; 0x100000 - 0x7fe0000
-; 0x1fb8000 size
+
+; TODO: edit GDT for this range
+; 0xf0000 - 0x7fe0000
+; 0x7ef0000 size
 gdt_start:
 gdt_null:
     dq 0
 gdt_code:
-    dw 0x1000           ; Limit 0:15
+    dw 0xFFFF           ; Limit 0:15
     dw 0x0000           ; Base 0:15
     db 0x00             ; Base 16:23
     db 10011010b        ; Access Byte
-    db 11000000b        ; Flags, Limit 16:19
+    db 11001111b        ; Flags, Limit 16:19
     db 0x00             ; Base 24:31
 gdt_data:
-    dw 0x1000           ; Limit 0:15
+    dw 0xFFFF           ; Limit 0:15
     dw 0x0000           ; Base 0:15
     db 0x00             ; Base 16:23
     db 10010010b        ; Access Byte
-    db 11000000b        ; Flags, Limit 16:19
-    db 0x01             ; Base 24:31
-gdt_stack:
-    dw 0x1000           ; Limit 0:15
-    dw 0x0000           ; Base 0:15
-    db 0x00             ; Base 16:23
-    db 10011010b        ; Access Byte
-    db 0x02             ; Base 24:31
+    db 11001111b        ; Flags, Limit 16:19
+    db 0x00             ; Base 24:31
 gdt_end:
 gdt_ptr:
     dw gdt_end - gdt_start - 1
@@ -64,6 +65,6 @@ gdt_ptr:
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
-STACK_SEG equ gdt_stack - gdt_start
+; STACK_SEG equ gdt_stack - gdt_start
 
-times 510 - ($ - $$) db 90h
+times 512 - ($ - $$) db 90h
