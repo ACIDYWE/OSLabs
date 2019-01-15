@@ -121,11 +121,18 @@ void __do_panic(const char* reason, const char* function, const char* loc) {
     print_str_with_color("\t\t\t*  Reboot your PC or VM or whatever your running this OS on.\n", BSOD_COLOR);
     print_str_with_color("\t\t\t*  Oylng vqv i cvmqh, anuhln gv rgb qrxbqvy?\n", BSOD_COLOR);
     print_str_with_color("\n\n\t\t\t\t\t\t  Press any key to nothing :)", BSOD_COLOR);
+
+foo:
+    asm("hlt");
+    goto foo;
 }
+
+// LDSCRIPT
+// TODO: specify prot_mode_tramp
 
 extern void kmain() {
     clear();
-    // panic("Invalid memory location access");
+    panic("Invalid memory location access");
     print_str("1234567876541234\t\t\t\t\t\t\t\t\t\t\t\t\tHmmm looks weird\n");
     stupid_sleep(1000);
     for(int i = 0; i < 30; i++) {

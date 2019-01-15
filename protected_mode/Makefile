@@ -23,16 +23,13 @@ LINKER_FLAGS=-T ldscript.ld -o
 # 	1 - kernel (to set some flags for building the bootloader)
 # 	2 - bootloader
 # 	3 - final disk.img
-all: $(KERNEL_BIN) $(BOOTLOADER_BIN) $(IMG) 
+all: $(BOOTLOADER_BIN) $(IMG) 
 	dd if=$(BOOTLOADER_BIN) of=$(IMG) bs=1 count=512 conv=notrunc
 	dd if=$(KERNEL_BIN) of=$(IMG) bs=512 count=$(SECNUM) seek=1 conv=notrunc
 
 
 $(KERNEL_BIN): $(PROTMODE_OBJ) $(KERNEL_OBJ) $(UTILS_OBJ)
 	$(LINKER) $(LINKER_FLAGS) $@ $^
-
-	$(eval SECNUM := $(shell wc -c kernel.o | awk '{ print int($$1 / 512) + (($$1 % 512) != 0) + 1}'))
-	SECTORS=-dSECTORS_TO_READ=$(SECNUM)
 
 $(UTILS_OBJ): $(UTILS_SRC)
 	$(GCC) $(GCC_FLAGS) $(UTILS_SRC)
@@ -45,8 +42,11 @@ $(PROTMODE_OBJ): $(PROTMODE_SRC)
 	$(CC) -felf32 -o $@ $^
 	
 
-$(BOOTLOADER_BIN): $(BOOTLOADER_SRC)
-	$(CC) $(CFLAGS) $(SECTORS) -o $@ $^
+$(BOOTLOADER_BIN): $(KERNEL_BIN) $(BOOTLOADER_SRC)
+	$(eval SECNUM := $(shell wc -c kernel | awk '{ print int($$1 / 512) + (($$1 % 512) != 0)}'))
+	SECTORS=-dSECTORS_TO_READ=$(SECNUM)
+
+	$(CC) $(CFLAGS) $(SECTORS) -o $@ $(word 2,$^)
 
 
 $(IMG):
